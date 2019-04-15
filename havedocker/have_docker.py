@@ -2,6 +2,7 @@
 
 
 import os
+import inspect
 import getpass
 import platform
 import subprocess
@@ -98,11 +99,31 @@ class DockerfileLocationError(Exception):
         return self.errorinfo
 
 
+class DockerStatusError(Exception):
+    """
+        # 定义DockerStatusError异常，容器已启动。
+    """
+
+    def __init__(self, Errorinfo):
+        super().__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
+
+
 class Agility_Docker(object):
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, help=False):
         """
         :param debug: 仅测试下，debug=True，将忽略docker是否存在。这将导致部分功能无法使用。
+        :param help: 默认False， 声明：需要方法提示时，help=True即可。
+        :param return: 在__init__中，并不设定return的存在，以exit()作为闭包。
         """
+        if help:
+            print("""{} From help:
+            :param debug: 仅测试下，debug=True，将忽略docker是否存在。这将导致部分功能无法使用。
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。""".format(self.__class__.__name__))
+            exit()
         if not debug:
             cmd = subprocess.Popen(
                 'docker --help',
@@ -113,21 +134,39 @@ class Agility_Docker(object):
             if self.cmd_status == 1:
                 raise DockerInitRunError('__main__.主机没有docker.server')
             elif self.cmd_status == 127:
-                raise DockerInitRunError('__main__.主机并不存在docker指令集 status={}'.format(cmd.wait()))
+                raise DockerInitRunError(
+                    '__main__.主机并不存在docker指令集 status={}'.format(
+                        cmd.wait()))
             elif self.cmd_status == 128:
-                raise DockerInitRunError('__main__.效验docker无效， status={}'.format(cmd.wait()))
+                raise DockerInitRunError(
+                    '__main__.效验docker无效， status={}'.format(
+                        cmd.wait()))
 
     @staticmethod
-    def cmd_query(debug=False, self_object='vessel'):
+    def get__function_name():
+        return inspect.stack()[1][3]
+
+    def cmd_query(self, debug=False, self_object='vessel', help=False):
         """
             # 用来查看所有在后台运行的docker实例化对象
             :param self_object: ('vessel' / 'images') 默认为'vessel'，只接收所有实例化容器信息。
             为'images'时，将收集本地docker中所存在images。
             :param debug: 默认为False。不为True时，只返回实例化vessel对象组的dict或images对象组的dict。
             为True时，不做修改将直接返回str
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
             :return: 如果docker存在后台运行容器，返回容器ID字典，dict_key为vessel的ID，值为除ID之外所有查询到的结果。
-            反之，只返回False。
+            反之，只返回False。当help=True时，将返回'help'
         """
+        if help:
+            print("""{}.{} From help:
+            :param self_object: ('vessel' / 'images') 默认为'vessel'，只接收所有实例化容器信息。
+            为'images'时，将收集本地docker中所存在images。
+            :param debug: 默认为False。不为True时，只返回实例化vessel对象组的dict或images对象组的dict。
+            为True时，不做修改将直接返回str
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 如果docker存在后台运行容器，返回容器ID字典，dict_key为vessel的ID，值为除ID之外所有查询到的结果。
+            反之，只返回False。当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
         if self_object == 'vessel':
             cmd = subprocess.Popen('docker ps -a', stdout=subprocess.PIPE)
             cmd = cmd.communicate()[0].decode()
@@ -205,26 +244,34 @@ class Agility_Docker(object):
             else:
                 return False
 
-    @staticmethod
-    def cmd_pull_images(images_name=None):
+    def cmd_pull_images(self, images_name=None, help=False):
         """
             # 拉取镜像
+            :param images_name: 提供的镜像名，以作拉取对象
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
             :return: 如果被拉取的镜像不存在，程序执行完成之后将会返回True。
-            若不提供images_name，将返回False。
+            若不提供images_name，将返回False。当help=True时，将返回'help'
         """
+        if help:
+            print("""{}.{} From help:
+            :param images_name: 提供的镜像名，以作拉取对象
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 如果被拉取的镜像不存在，程序执行完成之后将会返回True。
+            若不提供images_name，将返回False。当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
         if not images_name:
             return False
         commend = os.popen('docker pull {}'.format(images_name)).read()
         print(commend)
         return True
 
-    @staticmethod
-    def cmd_run_vessel(images_name=None,
+    def cmd_run_vessel(self, images_name=None,
                        run_cmd='/bin/bash',
                        vessel_name=None,
                        cpu_shares=None,
                        cpuset_cpus=None,
-                       blkio_weight=None
+                       blkio_weight=None,
+                       help=False
                        ):
         """
             # 实例化容器对象，并返回实例化对象的唯一HASH64中前12位，因为这是容器ID
@@ -234,8 +281,20 @@ class Agility_Docker(object):
             :param cpu_shares: int ~= int8 -128~127 -128~65535
             :param cpuset_cpus: int [0, 1, 2]
             :param blkio_weight: int 10~1000
-            :return: HASH64[:12]
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: HASH64[:12]，当help=True时，将返回'help'
         """
+        if help:
+            print("""{}.{} From help:
+            :param images_name: 默认为None
+            :param run_cmd: 默认实例化运行镜像时，将会以'/bin/bash'
+            :param vessel_name: str
+            :param cpu_shares: int ~= int8 -128~127 -128~65535
+            :param cpuset_cpus: int [0, 1, 2]
+            :param blkio_weight: int 10~1000
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: HASH64[:12]，当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
         self_commend = 'docker run -itd'
         if not images_name:
             raise DockerRunImageError('{}镜像不存在，无法实例化。'.format(images_name))
@@ -286,14 +345,23 @@ class Agility_Docker(object):
             images_id = commend[:12]
         return images_id
 
-    def docker_rm_object(self, Exclude=None, self_object='vessel'):
+    def docker_rm_object(self, Exclude=None, self_object='vessel', help=False):
         """
             # docker_rm_object 用来删除实例化容器
             :param Exclude: 默认为None。添加排除项，除Exclude之外删除
             :param self_object: 默认对象为实例化容器 ('vessel' / 'images')
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
             :return: 默认返回None。如果docker后台运行的容器介被删除，将以True作为尾值闭包。
-            如果cmd_ps_a()并没有给出正确值，那么将返回False。
+            如果cmd_ps_a()并没有给出正确值，那么将返回False。当help=True时，将返回'help'
         """
+        if help:
+            print("""{}.{} From help:
+            :param Exclude: 默认为None。添加排除项，除Exclude之外删除
+            :param self_object: 默认对象为实例化容器 ('vessel' / 'images')
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 默认返回None。如果docker后台运行的容器介被删除，将以True作为尾值闭包。
+            如果cmd_ps_a()并没有给出正确值，那么将返回False。当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
         vessel_id = self.cmd_query()
         images_id = self.cmd_query(self_object='images')
         if self_object == 'vessel':
@@ -331,29 +399,46 @@ class Agility_Docker(object):
             else:
                 return False
 
-    @staticmethod
-    def cmd_cp_into(goods=None, vessel=None, path=':/'):
+    def docker_cp(self, goods=None, vessel=None, path=':/', help=False):
         """
             # cmd_cp_into 用于就文件、文件夹复制移动到实例化容器指定路径上
             :param goods: 被复制对象(file/dir)
             :param vessel: 实例化容器
             :param path: 实例化容器中的指定路径
-            :return: goods和vessel同时存在(True), 将返回True。不满条件，返回False
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: goods和vessel同时存在(True), 将返回True。不满条件，返回False。当help=True时，将返回'help'
         """
+        if help:
+            print("""{}.{} From help:
+            :param goods: 被复制对象(file/dir)
+            :param vessel: 实例化容器
+            :param path: 实例化容器中的指定路径
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: goods和vessel同时存在(True), 将返回True。不满条件，返回False。当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
         if goods and vessel:
             os.popen('docker cp {} {}{}'.format(goods, vessel, path))
             return True
         else:
             return False
 
-    def docker_history(self, argument=None, all=False):
+    def docker_history(self, argument=None, all=False, help=False):
         """
             # docker_history 将对镜像进行分层树
             :param argument: 镜像repository
             :param all: 默认为False， all=False时，argument需要提供参数。
-            all=True时, argument不需要参数支持将返回所有镜像的history
-            :return: *args为单值时，返回command。*args为list时，返回key-value
+                    all=True时, argument不需要参数支持将返回所有镜像的history
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: *args为单值时，返回command。*args为list时，返回key-value。当help=True时，将返回'help'
         """
+        if help:
+            print("""{}.{} From help:
+            :param argument: 镜像repository
+            :param all: 默认为False， all=False时，argument需要提供参数。
+                    all=True时, argument不需要参数支持将返回所有镜像的history
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: *args为单值时，返回command。*args为list时，返回key-value。当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
         if not all:
             try:
                 assert argument
@@ -394,49 +479,65 @@ class Agility_Docker(object):
                     history[sh] = command
             return history
 
-    @staticmethod
-    def dockerfile(
-            FROM='centos',
-            MAINTAINER=platform.system(),
-            RUN=None,
-            CMD=None,
-            COPY=None,
-            ADD=None,
-            EXPOSE=None,
-            WORKDIR=None,
-            ENTRYPOINT=None,
-            ENV=None, VOLUME=None):
+    def dockerfile(self,
+                   FROM='centos',
+                   MAINTAINER=platform.system(),
+                   RUN=None,
+                   CMD=None,
+                   COPY=None,
+                   ADD=None,
+                   EXPOSE=None,
+                   WORKDIR=None,
+                   ENTRYPOINT=None,
+                   ENV=None,
+                   VOLUME=None, help=False):
         """
             # existing problem
             - 关于dockerfile文件中，MAINTAINER作者项暂时以兼容方式获取username
             - 关于dockerfile-body中，暂时采用dict方式进行存储。
-            - 遗留排序问题
-                        # for num, body in zip(COPY[1], COPY[0]):
-                            # if num > len_run_command:
-                            #     print(run_command)
-                            #     raise DockerfileError('{}参数，{}位置，超出下标范围'.format(body, num))
-                            # else:
-                            #     run_command.insert(num, body)
             - 暂未编写VOLUME，
             :param FROM: 镜像源
             :param MAINTAINER : 默认为系统名称，支持自定义
             :param RUN: 例子 RUN=['pip3 install tornado', 'apt update']，type=str/list
             :param CMD: 例子 CMD=['apt install httpd', 'yum install tree'], type=str/list
             :param COPY: 例子 COPY=[['EPC_test', '/'], [3]] type=str/list
-            COPY位置摆放逻辑：并不以下标为准，以存在的元素数量。如果有七条命令，那么指定的位置将为第几条命令。不存在0
+                    COPY位置摆放逻辑：并不以下标为准，以存在的元素数量。如果有七条命令，那么指定的位置将为第几条命令。不存在0
             :param ADD: 例子 ADD=[['nginx.1.14.2.tar', '/'], [4]] type=str/list
             :param EXPOSE: 例子 EXPOSE=[80, 8080, 443], type=int/list 始终位于dockerfile最底层
             :param WORKDIR: 例子 WORKDIR=[[['/root'], ['/bin']], [2, 3]], type=str/list
             :param ENTRYPOINT: 例子 ENTRYPOINT=[[['/bin/echo'], ['Hello World']], [2, 3]]
             :param ENV: 例子 type=str/list
-            ENV=[
-                 [['WELCOME "You are in my container, welcome!"'],
-                  ['name Cloud Man ENTRYPOINT echo "Hello, $name"']],
-                 [2, 3]
-                ]
+                    ENV=[
+                         [['WELCOME "You are in my container, welcome!"'],
+                          ['name Cloud Man ENTRYPOINT echo "Hello, $name"']],
+                         [2, 3]
+                        ]
             :param VOLUME: 例子 VOLUME=["/data1", "/data2"]，位于FROM、MAINTAINER之后 type=str/list
-            :return: 无
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 默认返回None， 当help=True时，将返回'help'
         """
+        if help:
+            print("""{}.{} From help:
+            :param FROM: 镜像源
+            :param MAINTAINER : 默认为系统名称，支持自定义
+            :param RUN: 例子 RUN=['pip3 install tornado', 'apt update']，type=str/list
+            :param CMD: 例子 CMD=['apt install httpd', 'yum install tree'], type=str/list
+            :param COPY: 例子 COPY=[['EPC_test', '/'], [3]] type=str/list
+                    COPY位置摆放逻辑：并不以下标为准，以存在的元素数量。如果有七条命令，那么指定的位置将为第几条命令。不存在0
+            :param ADD: 例子 ADD=[['nginx.1.14.2.tar', '/'], [4]] type=str/list
+            :param EXPOSE: 例子 EXPOSE=[80, 8080, 443], type=int/list 始终位于dockerfile最底层
+            :param WORKDIR: 例子 WORKDIR=[[['/root'], ['/bin']], [2, 3]], type=str/list
+            :param ENTRYPOINT: 例子 ENTRYPOINT=[[['/bin/echo'], ['Hello World']], [2, 3]]
+            :param ENV: 例子 type=str/list
+                    ENV=[
+                         [['WELCOME "You are in my container, welcome!"'],
+                          ['name Cloud Man ENTRYPOINT echo "Hello, $name"']],
+                         [2, 3]
+                        ]
+            :param VOLUME: 例子 VOLUME=["/data1", "/data2"]，位于FROM、MAINTAINER之后 type=str/list
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 默认返回None， 当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
         dockerfile = []
         os_name = MAINTAINER
 
@@ -535,3 +636,43 @@ class Agility_Docker(object):
 
         for element in dockerfile:
             print(element)
+
+    def vessel_status(self, argument='unpause', vessel_id=None, help=False):
+        """
+            vessel_status 方法，暂停或继续运行容器。区别于cmd_run_vessel()方法，提供针对容器管理的方案。
+            :param argument: 默认'unpause'， 可选参数 ['unpause' / 'pause']
+            :param vessel_id: 实例化容器ID，
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 默认返回None， 当help=True时，将返回'help'
+        """
+        if help:
+            print("""{}.{} From Help:
+            vessel_status 方法，暂停或继续运行容器。区别于cmd_run_vessel()方法，提供针对容器管理的方案。
+            :param argument: 默认'unpause'， 可选参数 ['unpause' / 'pause']
+            :param vessel_id: 实例化容器ID，
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 默认返回None， 当help=True时，将返回'help'""".format(self.__class__.__name__, self.get__function_name()))
+            return 'help'
+        if vessel_id is None:
+            raise DockerStatusError('vessel_status需要vessel_id参数， 而非None')
+        vessel_list = self.cmd_query()
+        if argument == 'unpause':
+            if vessel_id in vessel_list.keys():
+                if '(Paused)' in vessel_list.get(vessel_id)['status']:
+                    subprocess.Popen(
+                        'docker {} {}'.format(argument, vessel_id),
+                        stdout=subprocess.PIPE)
+                else:
+                    raise DockerStatusError(
+                        '{}容器状态并非...(Paused)，unpause失效'.format(vessel_id))
+            else:
+                raise DockerStatusError('{}容器未存在， unpause失效'.format(vessel_id))
+        elif argument == 'pause':
+            if vessel_id in vessel_list.keys():
+                subprocess.Popen(
+                    'docker {} {}'.format(argument, vessel_id),
+                    stdout=subprocess.PIPE)
+            else:
+                raise DockerStatusError('{}容器未存在， pause失效'.format(vessel_id))
+        else:
+            raise DockerStatusError('argument={}，未知指令'.format(argument))
