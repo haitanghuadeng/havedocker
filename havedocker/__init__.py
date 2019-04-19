@@ -3,8 +3,9 @@
 
 from .have_docker import Agility_Docker
 
-name = "have_docker"
-version = '0.1.3.2'
+name = "havedocker"
+version = '0.1.3.5'
 author = 'haitanghuadeng'
-description = "Repair havedocker exists in the BUG [Agility_Docker]"
+project = 'https://github.com/haitanghuadeng/havedocker'
+description = "New havedocker, already has the basic docker instruction"
 
