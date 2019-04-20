@@ -3,15 +3,15 @@
 
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding='utf-8') as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="havedocker",
-    version="0.1.3.5",
+    version="0.1.3.6",
     author="haitanghuadeng",
     author_email="491609917@qq.com",
-    description="New havedocker, already has the basic docker instruction",
+    description="Refactor local method",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/haitanghuadeng",
