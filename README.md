@@ -2,7 +2,7 @@
 	<h1 align="center">🐍havedocker🐋</h1>
 </p>
 
-<hr>
+<br>
 
 <p align="center">
     <a href="https://pypi.org/project/havedocker/">
@@ -14,30 +14,54 @@
     <a href="https://opensource.org/licenses/MIT">
         <img src="https://img.shields.io/badge/License-MIT-brightgreen.svg" alt="License">
     </a>
-    <a href="https://pypi.org/project/havedocker/">
+    <a href="https://chocolatey.org/">
+        <img src="https://img.shields.io/badge/ChocoLatey-0.10.11-blueviolet.svg">
+    </a>
+</p>
+
+<p align="center">
+	<a href="https://pypi.org/project/havedocker/">
     	<img src="https://img.shields.io/pypi/format/havedocker.svg?color=orange" alt="PYPI - Format">
     </a>
+    <a href="https://www.docker.com/">
+    	<img src="https://img.shields.io/badge/docker-18.09.2-ff69b4.svg">
+    </a>
+    <a href="https://cmder.net/">
+    	<img src="https://img.shields.io/badge/ConEmu-180626-yellow.svg">
+    </a>    
 </p>
 
 <br>
 
 <p> 
-	<h3 align="center">Update Version 0.1.3.5 </h3>    
+	<h3 align="center">Improved foundation version 0.1.3.6</h3>    
 </p>
+
+
 
 <hr><br>
 
+
+
 ### 🤔`repair problems` 
 
-> 1. Rewrite the `README` file
-> 2. In `gility_Docker`, add `Dockerport` method
-> 3. In `Agility_Docker.DockerRun`, add `network` and `IP` parameters
+> 1. Refactoring will ` DockerNetwork ` method
+>
+> 2. A small ` Agility_Docker. Method () ` revised
+>
+> 3. In the 'Agility_Docker' initialization, redefine the variable.The following syntax is supported:
+>
+>    ```python3
+>    docker.DockerVersion
+>    docker.DockerHelp
+>    ```
+>
 
 <br>
 
 ### 🗃️newly increased
 
-> In ` Version = 0.1.3.6 ` Version, will add ` Tag ` labels and ` connect ` parameters
+> In ` Version = 0.1.3.6 ` Revised Version
 
 <br>
 
@@ -47,12 +71,15 @@
 
 > `Method name change from 0.1.3.3`
 
-> `Docker state formatted output from 0.1.3.4`
+> Break up the logic = New ` DockerError. Py `
+
+> `Docker state formatted output from ...`
 
 <br>
 
-### 🚧Feature push for unknown version:
+### 🚧Feature push for unknown version
 
-1. Docker monitoring will be added, and `docker stats` will obtain real-time data.
-2. 📚 ` usage ` are writing...
+1. Local methods are being refactored
+2. Docker monitoring will be added, and `docker stats` will obtain realtime data.
+3. 📚 ` usage ` are writing
 
