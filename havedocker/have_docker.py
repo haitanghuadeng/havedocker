@@ -6,162 +6,7 @@ import inspect
 import getpass
 import platform
 import subprocess
-
-
-class DockerInitRunError(Exception):
-    """
-        # 定义DockerInitRunError异常，当前主机没有docker.server。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerRunImageError(Exception):
-    """
-        # 定义DockerRunImageError异常，实例化未知镜像错误。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerRunImageTypeError(Exception):
-    """
-        # 定义DockerRunImageTypeError异常，实例化未知镜像错误。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerHistoryArgsError(Exception):
-    """
-        # 定义DockerHistoryArgsError异常，层级树缺少参数args。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerHistoryTypeError(Exception):
-    """
-        # 定义DockerHistoryTypeError异常，层级树类型错误。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerfileError(Exception):
-    """
-        # 定义DockerHistoryArgsError异常，层级树缺少参数args。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerfileLocationError(Exception):
-    """
-        # 定义DockerfileLocationError异常，指令集位置错误。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerStatusError(Exception):
-    """
-        # 定义DockerStatusError异常，容器已启动。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerPushError(Exception):
-    """
-        # 定义DockerPushError异常，容器已启动。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerPullError(Exception):
-    """
-        # 定义DockerPushError异常，容器已启动。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerNetWorkError(Exception):
-    """
-        # 定义DockerNetWorkError异常，错误指令。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
-
-
-class DockerPortError(Exception):
-    """
-        # 定义DockerPortError异常，不存在的ID或名称。
-    """
-
-    def __init__(self, Errorinfo):
-        super(Exception, self).__init__(self)
-        self.errorinfo = Errorinfo
-
-    def __str__(self):
-        return self.errorinfo
+from havedocker.DockerError import *
 
 
 class Agility_Docker(object):
@@ -174,22 +19,27 @@ class Agility_Docker(object):
             print("""{} From help:
             :param debug: 仅测试下，debug=True，将忽略docker是否存在。这将导致部分功能无法使用。
             :param help: 默认False， 声明：需要方法提示时，help=True即可。""".format(self.__class__.__name__))
-        cmd = subprocess.Popen(
+        self.DockerHelp = subprocess.Popen(
             'docker --help',
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT)
-        self.cmd_status = cmd.wait()
-        if self.cmd_status == 1:
+        self.DockerVersion = subprocess.Popen(
+            'docker -v',
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT).communicate()[0].decode()
+        self.DockerStatus = self.DockerHelp.wait()
+        if self.DockerStatus == 1:
             raise DockerInitRunError('当前主机没有docker.server')
-        elif self.cmd_status == 127:
+        elif self.DockerStatus == 127:
             raise DockerInitRunError(
                 '当前主机并不存在docker指令集 status={}'.format(
-                    cmd.wait()))
-        elif self.cmd_status == 128:
+                    self.DockerHelp.wait()))
+        elif self.DockerStatus == 128:
             raise DockerInitRunError(
                 '效验docker无效， status={}'.format(
-                    cmd.wait()))
+                    self.DockerHelp.wait()))
 
     @staticmethod
     def __get__function_name():
@@ -300,25 +150,23 @@ class Agility_Docker(object):
             # DockerPull方法，拉取镜像
             :param images_name: 提供的镜像名，以作拉取对象
             :param help: 默认False， 声明：需要方法提示时，help=True即可。
-            :return: 如果被拉取的镜像不存在，程序执行完成之后将会返回True。
-            当help=True时，将返回'help'
+            :return: 默认返回执行命令结果，如果未提供拉取镜像名称，抛出异常。
         """
         if help:
             print(
                 """{}.{} From help:
             :param images_name: 提供的镜像名，以作拉取对象
             :param help: 默认False， 声明：需要方法提示时，help=True即可。
-            :return: 如果被拉取的镜像不存在，程序执行完成之后将会返回True。
-            当help=True时，将返回'help'""".format(
+            :return: 默认返回执行命令结果，如果未提供拉取镜像名称，抛出异常。'""".format(
                     self.__class__.__name__,
                     self.__get__function_name()))
             return 'help'
-        if not images_name:
+        if images_name:
+            commend = os.popen('docker pull {}'.format(images_name)).read()
+            return commend
+        else:
             raise DockerPullError(
                 "images_name:'{}'is None, 需要提供一个镜像名参数".format(images_name))
-        commend = os.popen('docker pull {}'.format(images_name)).read()
-        print(commend)
-        return True
 
     def DockerRun(self, images_name=None,
                   run_cmd='/bin/bash',
@@ -401,7 +249,7 @@ class Agility_Docker(object):
             blkio_weight = ''
         if network:
             if isinstance(network, str):
-                network_str = self.DockerNetwork()
+                network_str = self.DockerQueryNetwork(formatting=True)
                 if network in network_str:
                     network = ' --network {}'.format(network)
                 else:
@@ -475,18 +323,18 @@ class Agility_Docker(object):
         elif self_object == 'images':
             if images_id:
                 if Exclude:
-                    for e in Exclude:
-                        if e in images_id.keys():
-                            del images_id[e]
+                    for E in Exclude:
+                        if E in images_id.keys():
+                            del images_id[E]
                         else:
                             pass
-                    for j in images_id.keys():
+                    for idk in images_id.keys():
                         os.popen(
-                            'docker rmi -f {}'.format(images_id[j]['image_id']))
+                            'docker rmi -f {}'.format(images_id[idk]['image_id']))
                 else:
-                    for j in images_id:
+                    for id in images_id:
                         os.popen(
-                            'docker rmi -f {}'.format(images_id[j]['image_id']))
+                            'docker rmi -f {}'.format(images_id[id]['image_id']))
                 return True
             else:
                 return False
@@ -738,46 +586,46 @@ class Agility_Docker(object):
                            argument='unpause',
                            vessel_id=None,
                            help=False):
-                        """
-                            DockerVesselStatus 方法，暂停或继续运行容器。区别于cmd_run_vessel()方法，提供针对容器管理的方案。
-                            :param argument: 默认'unpause'， 可选参数 ['unpause' / 'pause']
-                            :param vessel_id: 实例化容器ID，
-                            :param help: 默认False， 声明：需要方法提示时，help=True即可。
-                            :return: 默认返回None， 当help=True时，将返回'help'
-                        """
-                        if help:
-                            print(
-                                """{}.{} From Help:
+        """
+            DockerVesselStatus 方法，暂停或继续运行容器。区别于cmd_run_vessel()方法，提供针对容器管理的方案。
+            :param argument: 默认'unpause'， 可选参数 ['unpause' / 'pause']
+            :param vessel_id: 实例化容器ID，
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 默认返回None， 当help=True时，将返回'help'
+        """
+        if help:
+            print(
+                """{}.{} From Help:
                             vessel_status 方法，暂停或继续运行容器。区别于cmd_run_vessel()方法，提供针对容器管理的方案。
                             :param argument: 默认'unpause'， 可选参数 ['unpause' / 'pause']
                             :param vessel_id: 实例化容器ID，
                             :param help: 默认False， 声明：需要方法提示时，help=True即可。
                             :return: 默认返回None， 当help=True时，将返回'help'""".format(
-                                    self.__class__.__name__, self.__get__function_name()))
-                            return 'help'
-                        if vessel_id is None:
-                            raise DockerStatusError('vessel_status需要vessel_id参数， 而非None')
-                        vessel_list = self.DockerQuery()
-                        if argument == 'unpause':
-                            if vessel_id in vessel_list.keys():
-                                if '(Paused)' in vessel_list.get(vessel_id)['status']:
-                                    subprocess.Popen(
-                                        'docker {} {}'.format(argument, vessel_id),
-                                        stdout=subprocess.PIPE)
-                                else:
-                                    raise DockerStatusError(
-                                        '{}容器状态并非...(Paused)，unpause失效'.format(vessel_id))
-                            else:
-                                raise DockerStatusError('{}容器未存在， unpause失效'.format(vessel_id))
-                        elif argument == 'pause':
-                            if vessel_id in vessel_list.keys():
-                                subprocess.Popen(
-                                    'docker {} {}'.format(argument, vessel_id),
-                                    stdout=subprocess.PIPE)
-                            else:
-                                raise DockerStatusError('{}容器未存在， pause失效'.format(vessel_id))
-                        else:
-                            raise DockerStatusError('argument={}，未知指令'.format(argument))
+                    self.__class__.__name__, self.__get__function_name()))
+            return 'help'
+        if vessel_id is None:
+            raise DockerStatusError('vessel_status需要vessel_id参数， 而非None')
+        vessel_list = self.DockerQuery()
+        if argument == 'unpause':
+            if vessel_id in vessel_list.keys():
+                if '(Paused)' in vessel_list.get(vessel_id)['status']:
+                    subprocess.Popen(
+                        'docker {} {}'.format(argument, vessel_id),
+                        stdout=subprocess.PIPE)
+                else:
+                    raise DockerStatusError(
+                        '{}容器状态并非...(Paused)，unpause失效'.format(vessel_id))
+            else:
+                raise DockerStatusError('{}容器未存在， unpause失效'.format(vessel_id))
+        elif argument == 'pause':
+            if vessel_id in vessel_list.keys():
+                subprocess.Popen(
+                    'docker {} {}'.format(argument, vessel_id),
+                    stdout=subprocess.PIPE)
+            else:
+                raise DockerStatusError('{}容器未存在， pause失效'.format(vessel_id))
+        else:
+            raise DockerStatusError('argument={}，未知指令'.format(argument))
 
     def DockerPush(self, images_name=None, help=False):
         """
@@ -804,190 +652,230 @@ class Agility_Docker(object):
         print(commend)
         return True
 
-    def DockerNetwork(
+    def DockerNewNetwork(
             self,
-            query=True,
-            Inspect=False,
-            create=False,
+            create=True,
             driver='bridge',
             subnet=None,
             gateway=None,
-            NetWorkEthName=None,
             NetWorkName=None,
-            rm=False,
-            Exclude=None,
-            rmNetWorkName=None,
             help=False):
         """
-            # DockerNetwork方法，
-            :param query: 默认True，只执行查询docker-network。query为False时，不再查询将创建虚拟网卡 bool
-            :param Inspect: 默认False, 当query=True时，方可使用。查询指定虚拟网卡的信息，return [...] bool值
-            :param create: 默认False，[True / False] create=True时，意为创建虚拟网卡  bool值
+            # DockerNewNetwork方法，
+            :param create: 默认True， create=True时，意为创建虚拟网卡  bool值
             :param driver: 默认None'，指定虚拟网卡类型 ['bridge' / 'overlay' / 'macvlan'] 'host'和'null'无法成为有效命令
             :param subnet: 默认None，提供网段信息 [127.0.0.1/24] str类型
             :param gateway: 默认None，提供网关信息 [192.168.1.1] str类型
-            :param NetWorkEthName: 默认为None，提供虚拟网卡名称或ID  [str / list]
-            :param NetWorkName: 默认为None，自定义虚拟网卡名称。如果query=False，NetWorkName若为None将抛出异常
-            :param rm: 默认False，当rm=True时，将删除虚拟网卡。但会自动忽略docker存在的前三个虚拟网卡
-            :param Exclude: 默认None，为rm添加排除项 list [...]
-            :param rmNetWorkName: 默认为None，在rm=True且没有排除项时使用，用于删除指定虚拟网卡。 str / list
+            :param NetWorkName: 默认为None，新建虚拟网卡的名称。如果query=False，NetWorkName若为None将抛出异常
             :param help: 默认False， 声明：需要方法提示时，help=True即可
             :return: 默认返回成功执行的命令结果，同样包含错误命令。
         """
         if help:
             print("""{}.{}
-            :param query: 默认True，只执行查询docker-network。query为False时，不再查询将创建虚拟网卡 bool
-            :param Inspect: 默认False, 当query=True时，方可使用。查询指定虚拟网卡的信息，return [...] bool值
-            :param create: 默认False，[True / False] create=True时，意为创建虚拟网卡  bool值
-            :param driver: 默认None'，指定虚拟网卡类型 ['bridge' / 'overlay' / 'macvlan'] 'host'和'null'无法成为有效命令
-            :param subnet: 默认None，提供网段信息 [127.0.0.1/24] str类型
-            :param gateway: 默认None，提供网关信息 [192.168.1.1] str类型
-            :param NetWorkEthName: 默认为None，提供虚拟网卡名称或ID  [str / list]
-            :param NetWorkName: 默认为None，自定义虚拟网卡名称。如果query=False，NetWorkName若为None将抛出异常
-            :param rm: 默认False，当rm=True时，将删除虚拟网卡。会自动忽略docker存在的前三个虚拟网卡
-            忽略|query |Inspect |create |driver |subnet |gateway | NetWorkEth/Name 参数
-            :param Exclude: 默认None，为rm添加排除项 list [...]
-            :param rmNetWorkName: 默认为None，在rm=True且没有排除项时使用，用于删除指定虚拟网卡。 str / list
-            :param help: 默认False， 声明：需要方法提示时，help=True即可
-            :return: 默认返回成功执行的命令结果，同样包含错误命令。""".format(
+                    :param create: 默认True， create=True时，意为创建虚拟网卡  bool值
+                    :param driver: 默认None'，指定虚拟网卡类型 ['bridge' / 'overlay' / 'macvlan'] 'host'和'null'无法成为有效命令
+                    :param subnet: 默认None，提供网段信息 [127.0.0.1/24] str类型
+                    :param gateway: 默认None，提供网关信息 [192.168.1.1] str类型
+                    :param NetWorkName: 默认为None，新建虚拟网卡的名称。如果query=False，NetWorkName若为None将抛出异常
+                    :param help: 默认False， 声明：需要方法提示时，help=True即可
+                    :return: 默认返回成功执行的命令结果，同样包含错误命令。""".format(
                 self.__class__.__name__,
                 self.__get__function_name()))
             return 'help'
-        """
-            docker_network = docker.DockerNetwork(query=True)
-            docker_network = docker_network.split('\n')
-            docker_name = []
-            for i in docker_network[1:-1]:
-                docker_name.append(i[:12])
-        """
-        if rm:
-            docker_network = self.DockerNetwork(query=True)
-            docker_network = docker_network.split('\n')
-            docker_name = []
-            for name in docker_network[1:-1]:
-                docker_name.append(name[:12])
-            if Exclude and rmNetWorkName:
-                raise DockerNetWorkError(
-                    "Refuse to exist together:Exclude | rmNetWorkName，拒绝同时存在")
-            if Exclude:
-                if isinstance(Exclude, str):
-                    if Exclude in docker_name:
-                        docker_name.remove(Exclude)
-                    else:
-                        raise DockerNetWorkError(
-                            "Exclude:{}，提供了一个并不存在的NetWorkName".format(Exclude))
-                    for names in docker_name[3:0]:
-                        os.popen('docker network rm {}'.format(names))
-                elif isinstance(Exclude, list):
-                    for nwn in Exclude:
-                        if nwn in docker_name:
-                            docker_name.remove(nwn)
-                        else:
-                            raise DockerNetWorkError(
-                                "Exclude:{}参数，并不存在的NetWorkName".format(nwn))
-                    for name in docker_name[3:0]:
-                        os.popen('docker network rm {}'.format(name))
-                else:
-                    raise DockerNetWorkError(
-                        "Exclude类型为{}， 错误类型".format(
-                            type(Exclude)))
-            if rmNetWorkName and not Exclude:
-                if isinstance(rmNetWorkName, str):
-                    if rmNetWorkName in docker_name[:3]:
-                        raise DockerNetWorkError(
-                            "rmNetWorkName:{}，无法将Docker中默认存在的虚拟网卡删除".format(rmNetWorkName))
-                    if rmNetWorkName in docker_name[3:]:
-                        commend = os.popen(
-                            'docker network rm {}'.format(rmNetWorkName))
-                        return commend
-                    else:
-                        raise DockerNetWorkError(
-                            "rmNetWorkName:{}参数，并不存在的NetWorkName".format(rmNetWorkName))
-                elif isinstance(rmNetWorkName, list):
-                    for name in rmNetWorkName:
-                        if name in docker_name[:3]:
-                            raise DockerNetWorkError(
-                                "rmNetWorkName:{}，无法将Docker中默认存在的虚拟网卡删除".format(name))
-                    for name in rmNetWorkName:
-                        os.popen('docker network rm {}'.format(name))
-                else:
-                    raise DockerNetWorkError(
-                        "rmNetWorkName类型为{}， 错误类型".format(
-                            type(rmNetWorkName)))
-            else:
-                if not docker_name[1:]:
-                    return None
-                for name in docker_name[3:]:
-                    os.popen('docker network rm {}'.format(name))
-
-        if not query and not NetWorkName:
+        if not create:
+            raise DockerNetWorkError("关键参数错误：create必须为True")
+        if not NetWorkName:
             raise DockerNetWorkError(
-                "{} not is None，需要提供参数".format(NetWorkName))
-
-        if query:
-            if create or subnet or gateway or NetWorkName:
-                raise DockerNetWorkError(
-                    "在'query=True'前提下，create| driver| subnet| gateway| NetWorkName|  其中任何都不需要参数")
-            if Inspect and NetWorkEthName is not None:
-                if isinstance(NetWorkEthName, str):
-                    _inspect = 'inspect'
-                    commend = os.popen(
-                        'docker network {} {}'.format(
-                            _inspect, NetWorkEthName)).read()
-                    return commend
-                elif isinstance(NetWorkEthName, list):
-                    network_info = {}
-                    _inspect = 'inspect'
-                    for name in NetWorkEthName:
-                        commend = os.popen(
-                            'docker network {} {}'.format(
-                                _inspect, name)).read()
-                        network_info[name] = commend
-                    return network_info
-            elif not Inspect:
-                commend = os.popen('docker network ls').read()
-                return commend
-            else:
-                raise DockerNetWorkError("当inspect=True， NetWorkEthName并不需要参数")
+                "NetWorkName:{} not is None，需要提供参数".format(NetWorkName))
+        if type(NetWorkName) not in [str, None]:
+            raise DockerNetWorkError("create=True时，必须提供NetWorkName参数")
+        if driver not in ['bridge', 'overlay', 'macvlan']:
+            raise DockerNetWorkError(
+                "--driver {}提供的参数错误，查询help".format(driver))
+        if not subnet and not gateway and NetWorkName:
+            commend = os.popen(
+                'docker network create {}'.format(NetWorkName)).read()
+            return commend
+        if subnet and not gateway and NetWorkName:
+            raise DockerNetWorkError("--gateway 需要提供参数")
+        elif not subnet and gateway and NetWorkName:
+            raise DockerNetWorkError("--subnet 需要提供参数")
+        elif not subnet and not gateway and driver and NetWorkName:
+            commend = os.popen('docker network create --driver {} {}'.format(
+                driver, NetWorkName)).read()
+            return commend
         else:
-            if type(NetWorkName) not in [str, None]:
-                raise DockerNetWorkError("create=True时，必须提供NetWorkName参数")
-            if not create:
-                raise DockerNetWorkError("关键参数错误：create必须为True")
-            if driver not in ['bridge', 'overlay', 'macvlan']:
-                raise DockerNetWorkError(
-                    "--driver {}提供的参数错误，查询help".format(driver))
-            if not subnet and not gateway and NetWorkName:
-                commend = os.popen(
-                    'docker network create {}'.format(NetWorkName)).read()
-                return commend
-            if subnet and not gateway and NetWorkName:
-                raise DockerNetWorkError("--gateway 需要提供参数")
-            elif not subnet and gateway and NetWorkName:
-                raise DockerNetWorkError("--subnet 需要提供参数")
-            elif not subnet and not gateway and driver and NetWorkName:
-                commend = os.popen('docker network create --driver {} {}'.format(
-                    driver, NetWorkName)).read()
-                return commend
-            else:
-                if isinstance(
-                    subnet,
-                    str) and isinstance(
-                    gateway,
-                    str) and isinstance(
-                    driver,
-                        str):
-                    if '/' in subnet:
-                        commend = os.popen(
-                            'docker network create --driver {} --subnet {} --subnet {} {}'.format(
-                                driver, subnet, subnet, NetWorkName)).read()
-                        return commend
-                    else:
-                        raise DockerNetWorkError(
-                            "--subnet 需要标准IP地址格式，当前类型不符，查询help")
+            if isinstance(
+                subnet,
+                str) and isinstance(
+                gateway,
+                str) and isinstance(
+                driver,
+                    str):
+                if '/' in subnet:
+                    commend = os.popen(
+                        'docker network create --driver {} --subnet {} --subnet {} {}'.format(
+                            driver, subnet, subnet, NetWorkName)).read()
+                    return commend
                 else:
                     raise DockerNetWorkError(
-                        "subnet | gateway | driver 需要str类型，当前类型不符")
+                        "--subnet 需要标准IP地址格式，当前类型不符，查询help")
+            else:
+                raise DockerNetWorkError(
+                    "subnet | gateway | driver 需要str类型，当前类型不符")
+
+    def DockerQueryNetwork(self, formatting=False, Inspect=False, NetworkName=None, help=False):
+        """
+            # DockerQueryNetwork方法，用于查询docker中的虚拟网卡
+            :param formatting: 默认False， 不做处理直接返回执行结果。formatting=True，将返回字典
+            :param Inspect: 默认False，Inspect=True时，必须提供NetworkName值
+            :param NetworkName: 默认None，需要时，传入str值
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 返回结果
+        """
+        if help:
+            print("""{}.{}            
+            :param formatting: 默认False， 不做处理直接返回执行结果。formatting=True，将返回字典(但对inspect无效)
+            :param Inspect: 默认False，Inspect=True时，必须提供NetworkName值
+            :param NetworkName: 默认None，需要时，传入str值
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 返回结果""".format(
+                    self.__class__.__name__,
+                    self.__get__function_name()))
+            return 'help'
+        if Inspect:
+            if isinstance(NetworkName, str):
+                if NetworkName in self.DockerQueryNetwork():
+                    command = subprocess.Popen('docker network inspect {}'.format(NetworkName), stdout=subprocess.PIPE)
+                    command = command.communicate()[0].decode()
+                    return command
+                else:
+                    raise DockerQueryNetworkError("NetworkName:{}错误传参".format(NetworkName))
+            else:
+                raise DockerQueryNetworkError("NetworkName:{},{}错误类型或未传参".format(type(NetworkName), NetworkName))
+        else:
+            if isinstance(NetworkName, str):
+                raise DockerQueryNetworkError("只查询时，无需NetworkName参数")
+            command = subprocess.Popen('docker network ls', stdout=subprocess.PIPE)
+            command = command.communicate()[0].decode()
+            if formatting:
+                network_list = command.split('\n')
+                network = {}
+                vessel_type = network_list[0]
+
+                network_id = [
+                    vessel_type.index('NETWORK ID'),
+                    vessel_type.index('NAME')]
+                network_name = [
+                    vessel_type.index('NAME'),
+                    vessel_type.index('DRIVER')]
+                network_driver = [
+                    vessel_type.index('DRIVER'),
+                    vessel_type.index('SCOPE')]
+                vessel_scope = [
+                    vessel_type.index('SCOPE'),
+                    len(vessel_type) + 1]
+                vessel_body = network_list[1:-1]
+
+                for selfvessel in vessel_body:
+                    network['{}'.format((selfvessel[network_id[0]:network_id[1]]).rstrip())] = {
+                        'name': (selfvessel[network_name[0]:network_name[1]]).rstrip(),
+                        'driver': (selfvessel[network_driver[0]:network_driver[1]]).rstrip(),
+                        'scope': (selfvessel[vessel_scope[0]:vessel_scope[1]]).rstrip()
+                    }
+                return network
+            else:
+                return command
+
+    def DockerRmNetwork(self, Exclude=None, RmNetworkName=None, help=False):
+        """
+            # DockerRmNetwork方法，用于删除指定的虚拟网卡
+            :param Exclude: 默认为None，添加排除项 str / list
+            :param RmNetworkName: 选择删除指定的虚拟网卡名称
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 返回执行结果
+        """
+        if help:
+            print("""{}.{}
+            :param Exclude: 默认为None，添加排除项
+            :param RmNetworkName: 选择删除指定的虚拟网卡名称
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return: 返回执行结果""".format(
+                    self.__class__.__name__,
+                    self.__get__function_name()))
+            return 'help'
+        if RmNetworkName is None:
+            if isinstance(Exclude, str):
+                network_list = [i for i in self.DockerQueryNetwork(formatting=True)]
+                if Exclude in network_list:
+                    network_list.remove(Exclude)
+                    for name in network_list:
+                        subprocess.Popen('docker network rm {}'.format(name), stdout=subprocess.PIPE)
+                return True
+            elif isinstance(Exclude, list):
+                network_list = [i for i in self.DockerQueryNetwork(formatting=True)]
+                if Exclude in network_list:
+                    for exclude in network_list:
+                        network_list.remove(exclude)
+                    if network_list is []:
+                        return True
+                    for name in network_list:
+                        subprocess.Popen('docker network rm {}'.format(name), stdout=subprocess.PIPE)
+                return True
+            else:
+                raise DockerRmNetworkError("Exclude:{} 参数需要提供".format(Exclude))
+        elif isinstance(RmNetworkName, str):
+            subprocess.Popen('docker network rm {}'.format(RmNetworkName), stdout=subprocess.PIPE)
+            return True
+        elif isinstance(RmNetworkName, list):
+            commend = 'docker network rm'
+            for name in RmNetworkName:
+                commend = commend + ' ' + name
+            subprocess.Popen('docker network rm {}'.format(commend), stdout=subprocess.PIPE)
+            return True
+        else:
+            raise DockerRmNetworkError("DockerRmNetwork:{}未知类型".format(type(RmNetworkName)))
+
+    def DockerConnectNetwork(self, Network=None, VesselName=None, help=False):
+        """
+            # DockerConnectNetwork方法，用于对指定容器添加虚拟网卡
+            :param Network: 默认None，指定虚拟网卡名称
+            :param VesselName: 默认None，指定容器ID
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return:默认返回执行结果
+        """
+        if help:
+            print("""{}.{}            
+            :param Network: 默认None，指定虚拟网卡名称
+            :param VesselName: 默认None，指定容器ID
+            :param help: 默认False， 声明：需要方法提示时，help=True即可。
+            :return:默认返回执行结果""".format(
+                    self.__class__.__name__,
+                    self.__get__function_name()))
+            return 'help'
+        if isinstance(Network, str) and isinstance(VesselName, str):
+            vessel_name = [self.DockerQuery()[i]['names'] for i in self.DockerQuery()]
+            if VesselName in self.DockerQuery():
+                if Network in self.DockerQueryNetwork(formatting=True):
+                    subprocess.Popen('docker network connect {} {}'.format(Network, VesselName), stdout=subprocess.PIPE)
+                    return True
+                else:
+                    raise DockerConnectNetworkError("Network:{}未知参数".format(Network))
+            if VesselName in vessel_name:
+                if Network in self.DockerQueryNetwork(formatting=True):
+                    subprocess.Popen('docker network connect {} {}'.format(Network, VesselName), stdout=subprocess.PIPE)
+                    print('docker network connect {} {}'.format(Network, vessel_name))
+                    return True
+                else:
+                    raise DockerConnectNetworkError("Network:{}未知参数".format(Network))
+            else:
+                raise DockerConnectNetworkError("VesselName:{}未知参数".format(VesselName))
+        elif isinstance(Network, str) and not VesselName:
+            raise DockerConnectNetworkError("VesselName:{}未传递参数".format(VesselName))
+        elif isinstance(VesselName, str) and not Network:
+            raise DockerConnectNetworkError("Network:{}未传递参数".format(Network))
+        else:
+            raise DockerConnectNetworkError("DockerConnectNetworkError:未传递任何参数!")
 
     def DockerPort(self, vessel_name=None, help=False):
         """
@@ -1003,7 +891,7 @@ class Agility_Docker(object):
                 self.__class__.__name__,
                 self.__get__function_name()))
             return 'help'
-        if isinstance(type(vessel_name), str):
+        if isinstance(vessel_name, str):
             vessel_list = self.DockerQuery()
             names = []
             if vessel_name in vessel_list.keys():
@@ -1031,9 +919,79 @@ class Agility_Docker(object):
                 "Vessel_name:{}，错误的vessel_name类型".format(
                     type(vessel_name)))
 
+    def DockerTag(self, oldName=None, newName=None, help=False):
+        """
+            # DockerTag方法，用来修改镜像标签
+            :param oldName: 原镜像名称 str
+            :param newName: 新镜像名称 str
+            :param help: 默认False， 声明：需要方法提示时，help=True即可
+            :return: 返回命令执行状态
+        """
+        if help:
+            print("""{}.{} From help:
+            :param oldName: 原镜像名称 str
+            :param newName: 新镜像名称 str
+            :param help: 默认False， 声明：需要方法提示时，help=True即可
+            :return: 返回命令执行状态""".format(
+                self.__class__.__name__,
+                self.__get__function_name()))
+            return 'help'
+        docker_images = self.DockerQuery(self_object='images')
+        if isinstance(oldName, str):
+            if isinstance(newName, str):
+                images_list = []
+                for name in docker_images:
+                    images_list.append(docker_images[name]['image_id'])
+                if oldName in docker_images or oldName in images_list:
+                    cmd = subprocess.Popen(
+                        'docker tag {} {}'.format(oldName, newName),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        bufsize=1)
+                    return cmd.communicate()[0].decode()
+            elif not newName:
+                raise DockerTagError("newName:{}未知参数，可查询帮助".format(newName))
+            else:
+                raise DockerTagError(
+                    "newName:{}提供了错误类型，可查询帮助".format(
+                        type(newName)))
+        else:
+            raise DockerTagError(
+                "oldName:{}提供了错误类型，可查询帮助".format(
+                    type(oldName)))
+
 
 if __name__ == '__main__':
+    docker = Agility_Docker()
+    aa = docker.DockerVersion
+    print(aa)
     pass
+"""
+    docker = Agility_Docker()
+    print(docker.DockerQueryNetwork(Inspect=True, NetworkName='fad41f9a44e9'))
+    # 查询指定虚拟网卡的详细信息
+"""
+"""
+    docker = Agility_Docker()
+    print(
+        docker.DockerNewNetwork(
+            create=True,
+            NetWorkName='test1'))
+    # 新建虚拟网卡'test1'，默认类型
+"""
+"""
+    docker = Agility_Docker()
+    docker.DockerConnectNetwork(Network='fad41f9a44e9', VesselName='123')
+    # 由于实例化容器名并不存在，所以抛出DockerConnectNetworkError:未知参数
+"""
+"""
+    docker = Agility_Docker()
+    docker.DockerRmNetwork(RmNetworkName=['fad41f9a44e9', '690455df4dbd', 'aea5b4a1ba89'])
+"""
+"""
+    docker = Agility_Docker()
+    docker.DockerTag(oldName='fce289e99eb9', newName='test1')
+"""
 """
     docker = Agility_Docker()
     print(
@@ -1057,8 +1015,7 @@ if __name__ == '__main__':
 """
     docker = Agility_Docker()
     print(
-        docker.DockerNetwork(
-            query=False,
+        docker.DockerNewNetwork(
             create=True,
             subnet='192.168.0.0/24',
             gateway='192.168.0.1',
