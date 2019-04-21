@@ -220,3 +220,94 @@ class DockerConnectNetworkError(Exception):
 
     def __str__(self):
         return self.errorinfo
+
+
+class DockerTopError(Exception):
+    """
+        # 定义DockerTopError异常
+    """
+
+    def __init__(self, Errorinfo):
+        super(Exception, self).__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
+
+
+class DockerLogsError(Exception):
+    """
+        # 定义DockerLogsError异常
+    """
+
+    def __init__(self, Errorinfo):
+        super(Exception, self).__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
+
+
+class DockerCommitError(Exception):
+    """
+        # 定义DockerCommitError异常
+    """
+
+    def __init__(self, Errorinfo):
+        super(Exception, self).__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
+
+
+class DockerQueryVolumeError(Exception):
+    """
+        # 定义DockerQueryVolumeError异常
+    """
+
+    def __init__(self, Errorinfo):
+        super(Exception, self).__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
+
+
+class DockerRmVolumeError(Exception):
+    """
+        # 定义DockerRmVolumeError异常
+    """
+
+    def __init__(self, Errorinfo):
+        super(Exception, self).__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
+
+
+class DockerCreateVolumeError(Exception):
+    """
+        # 定义DockerCreateVolumeError异常
+    """
+
+    def __init__(self, Errorinfo):
+        super(Exception, self).__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
+
+
+class DockerMachineError(Exception):
+    """
+        # 定义DockerMachineError异常
+    """
+
+    def __init__(self, Errorinfo):
+        super(Exception, self).__init__(self)
+        self.errorinfo = Errorinfo
+
+    def __str__(self):
+        return self.errorinfo
