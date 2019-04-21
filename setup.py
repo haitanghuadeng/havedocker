@@ -8,10 +8,10 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setuptools.setup(
     name="havedocker",
-    version="0.1.3.6",
+    version="0.1.3.7",
     author="haitanghuadeng",
     author_email="491609917@qq.com",
-    description="Refactor local method",
+    description="Additional version based on 0.1.3.6 version",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/haitanghuadeng",
