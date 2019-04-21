@@ -1,6 +1,4 @@
-<p>
-	<h1 align="center">🐍havedocker🐋</h1>
-</p>
+<h1 align='center'>🐍havedocker🐋</h1>
 
 <br>
 
@@ -34,52 +32,54 @@
 <br>
 
 <p> 
-	<h3 align="center">Improved foundation version 0.1.3.6</h3>    
+	<h2 align="center">🌴Additional version based on ` 0.1.3.6 ` version</h2>    
 </p>
 
 
 
-<hr><br>
+<hr>
 
+### 📌`repair problems` 
 
+1. > Refactoring will ` DockerNetwork ` method
 
-### 🤔`repair problems` 
+2. > The new `method`
 
-> 1. Refactoring will ` DockerNetwork ` method
->
-> 2. A small ` Agility_Docker. Method () ` revised
->
-> 3. In the 'Agility_Docker' initialization, redefine the variable.The following syntax is supported:
->
->    ```python3
->    docker.DockerVersion
->    docker.DockerHelp
->    ```
->
+3. > In the 'Agility_Docker' initialization, redefine the variable.The following syntax is supported:
+
+> ```python3
+> docker.DockerMachineVersion
+> ```
 
 <br>
 
 ### 🗃️newly increased
 
-> In ` Version = 0.1.3.6 ` Revised Version
+1. > Additional version based on ` 0.1.3.6 ` version
+
+2. > ` Docker - stats ` be extended interface
+
+3. > Using document will be ` 0.1.3.8 ` open version, reference object for ` 0.1.3.8 ` version
 
 <br>
 
 ### 📅History node version
 
-> `newly increased 'help' from 0.1.3.2 `
+1. > `newly increased help from 0.1.3.2 `
 
-> `Method name change from 0.1.3.3`
+2. > `Method name change from 0.1.3.3`
 
-> Break up the logic = New ` DockerError. Py `
+3. > `Break up the logic New DockerError. Py from 0.1.3.6`  
 
-> `Docker state formatted output from ...`
+4. > `Docker state formatted output from ...`
 
 <br>
 
 ### 🚧Feature push for unknown version
 
-1. Local methods are being refactored
-2. Docker monitoring will be added, and `docker stats` will obtain realtime data.
-3. 📚 ` usage ` are writing
+1. > Local methods are being refactored
+
+2. > Individual methods of optimization have been proposed
+
+3. > 📚 ` usage ` are writing
 
