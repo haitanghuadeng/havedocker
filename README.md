@@ -32,12 +32,13 @@
 <br>
 
 <p> 
-	<h2 align="center">🌴Additional version based on ` 0.1.3.6 ` version</h2>    
+	<h2 align="center">🌴Additional version based on ` 0.1.3.6 ` version</h2>
+</p>
+<p>
+	<h2 align="center">🎣Agile to complete`pip install havedocker</h2>
 </p>
 
-
-
-<hr>
+<br>
 
 ### 📌`repair problems` 
 
